@@ -215,15 +215,14 @@ void last_login(char *username, struct user *user) {
             user->last_login[index] = buffer;
             user->tty[index] = strndup(ut->ut_line, UT_LINESIZE);
             set_idle_time(ut->ut_line, user, index);
-            index++; //itero per tutte le istanze dello stesso username che trovo, perché ci possono essere più sessioni 
-                     // attive per uno stesso utente
+            index++; // Iterate over all instances of the same username found, as there can be multiple active sessions for the same user
         }
     }
     endutent();
 
-    if (session_count == 0) { //Non ho trovato nessuna sessione attiva dell'utente attuale
+    if (session_count == 0) { // No active session found for the current user
         user->last_login = malloc(sizeof(char *));
-        user->last_login[0] = NULL; // Lascia inizialmente NULL
+        user->last_login[0] = NULL; // Initially set to NULL
         user->tty = malloc(sizeof(char *));
         user->tty[0] = NULL;
         user->idle_time = malloc(sizeof(char *));
@@ -232,14 +231,15 @@ void last_login(char *username, struct user *user) {
         user->short_idle[0] = NULL;
         user->session_count = 1;
 
-        // Verifico se nel file wtmp sono presenti dei login dell'utente
+        // Check if the user's login records exist in the wtmp file
         get_last_login_from_wtmp(username, user);
 
-        if (user->last_login[0] == NULL) { // Se non abbiamo trovato un ultimo login
+        if (user->last_login[0] == NULL) { // If no last login was found
             user->last_login[0] = strdup("No logins");
         }
     }
 }
+
 struct user *set_user_info(struct passwd *pwd, char *username) {
     struct user *user = malloc(sizeof(struct user));
     char *gecos = strdup(pwd->pw_gecos);
@@ -262,28 +262,28 @@ void print_user_info(struct passwd *pwd, struct flag *flag, char *username, int 
     char *office = (user->office) ? user->office : "*";
     char *home_phone = (user->home_phone) ? user->home_phone : "*";
         
-    // Formattazione dei numeri di telefono
+    // Formatting phone numbers
     char *formatted_office_phone = format_phone_number(office_phone);
     char *formatted_home_phone = format_phone_number(home_phone);
 
     if (flag->s_flag == 1) {
-        if (idx < 1) { // Se è la prima chiamata vado a stampare le colonne
+        if (idx < 1) { // If it's the first call, print the columns
             printf("Login\tName\tTty\tIdle\tLogin Time\tOffice\tOffice Phone\n");
         }
         for (int i = 0; i < user->session_count; i++) {
             char *last_login = user->last_login[i];
             char *tty = user->tty[i] ? user->tty[i]: "*";
             char *short_idle = user->short_idle[i] ? user->short_idle[i] : "*";
-            if(user->write_permission[i] == 0){ //Vado a mettere l'asterisco all'inizio del tty se non ha i permessi di scrittura
-                int new_len = strlen(tty) + 2; //1 per * e uno per \0
+            if(user->write_permission[i] == 0){ // Add an asterisk before the tty if there are no write permissions
+                int new_len = strlen(tty) + 2; // 1 for * and 1 for \0
                 char *new_tty = malloc(new_len * sizeof(char));
                 new_tty[0] = '*';
-                strcpy(new_tty + 1,tty);
+                strcpy(new_tty + 1, tty);
                 tty = new_tty;
             }
-            if (strcmp(last_login, "No logins") != 0) { //Mi creo la versione più piccola del last login
-                int len = strlen(last_login) - 13; //4 caratteri li tolgo all'inizio per il mese e 5 alla fine per l'anno (altri 4 per lo spazio e i secondi)
-                char substring[len + 1]; // 1 per il terminatore '\0'
+            if (strcmp(last_login, "No logins") != 0) { // Create a shortened version of the last login time
+                int len = strlen(last_login) - 13; // Remove 4 characters at the start for the month and 5 at the end for the year (another 4 for the space and seconds)
+                char substring[len + 1]; // 1 for the null terminator '\0'
                 strncpy(substring, last_login + 4, len);
                 substring[len] = '\0';
                 strcpy(last_login, substring);
@@ -313,7 +313,7 @@ void print_user_info(struct passwd *pwd, struct flag *flag, char *username, int 
             }
         }
 
-        if (is_active) { //controllo se l'utente è attivo attualmente
+        if (is_active) { // Check if the user is currently active
             for (int i = 0; i < user->session_count; i++) {
                 char *last_login = user->last_login[i];
                 char *tty = user->tty[i];
@@ -332,21 +332,22 @@ void print_user_info(struct passwd *pwd, struct flag *flag, char *username, int 
             }
         }
 
-        read_file(pwd->pw_dir,"forward");
+        read_file(pwd->pw_dir, "forward");
         read_mail_status(user->name);
         if (flag->p_flag != 1) {
-            read_file(pwd->pw_dir,"pgpkey");
-            read_file(pwd->pw_dir,"project");
-            read_file(pwd->pw_dir,"plan");
+            read_file(pwd->pw_dir, "pgpkey");
+            read_file(pwd->pw_dir, "project");
+            read_file(pwd->pw_dir, "plan");
         }
         printf("\n");
     }
     
-    // Libero la memoria allocata
+    // Free allocated memory
     free(formatted_office_phone);
     free(formatted_home_phone);
     cleanup_user(user);
 }
+
 /*
 La funzione serve a cercare un utente tramite il fullname (o parte di esso)
 */
