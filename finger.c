@@ -78,7 +78,7 @@ void read_mail_status(const char *username) {
     }
 }
 /*
-Funzione usata per leggere le informazioni contenute nei file .plan,.pgpkey,.project e .forward
+Function used to read the information contained in the .plan, .pgpkey, .project, and .forward files
 */
 void read_file(const char *home_dir, char *filename) {
     char file[MAX_PATH_LENGTH];
@@ -112,7 +112,7 @@ void set_idle_time(const char *tty, struct user *user, int session_index) {
     struct stat tty_stat;
     char tty_path[256];
     char *buffer = malloc(256 * sizeof(char)); 
-    char *short_buffer = malloc(10 * sizeof(char)); //versione breve usata per la stampa con l'operatore -s
+    char *short_buffer = malloc(10 * sizeof(char)); // short version used for printing with the -s operator
 
     snprintf(tty_path, sizeof(tty_path), "/dev/%s", tty);
     if (stat(tty_path, &tty_stat) == -1) {
@@ -125,8 +125,8 @@ void set_idle_time(const char *tty, struct user *user, int session_index) {
     int idle_minutes = idle_time / 60;
     int idle_seconds = idle_time % 60;
     const short permission = 0220;
-    //faccio un biwise and per controllare s eho i permessi di scrittura oppure no
-    int writable = ((tty_stat.st_mode & permission) == permission); //variabile per controllare i permessi di scrittura
+    // Perform a bitwise AND to check if I have write permissions or not
+    int writable = ((tty_stat.st_mode & permission) == permission); // variable to check write permissions
     user->write_permission[session_index] = writable;
 
     if (idle_minutes >= 60) {
@@ -149,8 +149,7 @@ void set_idle_time(const char *tty, struct user *user, int session_index) {
 }
 
 /*
-se l'utente non è attualmente online vado a cercare il suo ultimo accesso nel file wtmp, poichè nel file utmp 
-non sarebbe presente
+If the user is not currently online, I look for their last login in the wtmp file, since they wouldn't be present in the utmp file
 */
 void get_last_login_from_wtmp(const char *username, struct user *user) {
     struct utmpx ut;
@@ -164,8 +163,8 @@ void get_last_login_from_wtmp(const char *username, struct user *user) {
     time_t last_login_time = 0;
     char *buffer = malloc(256 * sizeof(char));
     /*
-    read(fd, &ut, sizeof(ut)): read legge sizeof(ut) byte dal file descriptor fd (che è il file /var/log/wtmp) 
-    e li memorizza nella struttura "ut" utmpx. Poi controlla se read ha letto esattamente sizeof(ut) byte
+    read(fd, &ut, sizeof(ut)): read reads sizeof(ut) bytes from the file descriptor fd (which is the /var/log/wtmp file) 
+    and stores them in the "ut" utmpx structure. Then it checks if read has read exactly sizeof(ut) bytes.
     */
     while (read(fd, &ut, sizeof(ut)) == sizeof(ut)) {
         if (ut.ut_type == USER_PROCESS && strncmp(ut.ut_user, username, sizeof(ut.ut_user)) == 0){
@@ -185,6 +184,7 @@ void get_last_login_from_wtmp(const char *username, struct user *user) {
         free(buffer);
     }
 }
+
 
 void last_login(char *username, struct user *user) {
     struct utmp *ut;
