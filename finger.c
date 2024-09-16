@@ -347,23 +347,23 @@ void print_user_info(struct passwd *pwd, struct flag *flag, char *username, int 
     free(formatted_home_phone);
     cleanup_user(user);
 }
-
 /*
-La funzione serve a cercare un utente tramite il fullname (o parte di esso)
+The function is used to search for a user by their full name (or part of it)
 */
-char **find_user(const char *name,int *num_users) {
+char **find_user(const char *name, int *num_users) {
     struct passwd *pw;
-    FILE *f = fopen("/etc/passwd","r");
+    FILE *f = fopen("/etc/passwd", "r");
     char line[MAX_LINE_LENGTH];
-    char **users = malloc(10*sizeof(char*)); //array con massimo 10 stringhe
+    char **users = malloc(10 * sizeof(char*)); // Array with a maximum of 10 strings
     int i = 0;
     char *u;
-while (fgets(line, MAX_LINE_LENGTH, f) != NULL) {
-        if(strstr(line,name)){
+
+    while (fgets(line, MAX_LINE_LENGTH, f) != NULL) {
+        if (strstr(line, name)) {
             //printf("%s\n", line);
-            u = strtok(line,":");
+            u = strtok(line, ":");
             users[i] = strdup(u);
-            i ++;
+            i++;
         }
     }
     *num_users = i;
@@ -377,12 +377,12 @@ void handle_non_option_args(int argc, char *argv[], struct flag *flag, int *non_
         char *u = argv[idx];
         struct passwd *pwd = getpwnam(u);
         
-        if (pwd == NULL) { //utente non trovato, provo a vedere se c'è una corrispondenza nel full name
-            if (flag->m_flag != 1) { //se ho usato l'operatore -m non vado a cercare una corrispondenza nel full name
+        if (pwd == NULL) { // User not found, try to find a match in the full name
+            if (flag->m_flag != 1) { // If the -m operator was used, do not search for a match in the full name
                 int num_users;
                 char **users = find_user(u, &num_users); 
-                if (users != NULL) { //Se ho una corrispondenza, procedo a stamparmi le informazioni dell'utente
-                    if (flag->l_flag != 1 && flag->s_flag != 1) { // Se non ci sono operatori, metto di default il flag su -l
+                if (users != NULL) { // If a match is found, proceed to print the user's information
+                    if (flag->l_flag != 1 && flag->s_flag != 1) { // If no operators are used, default the flag to -l
                         flag->l_flag = 1;
                     }
                     for (int j = 0; j < num_users; j++) {
@@ -391,7 +391,7 @@ void handle_non_option_args(int argc, char *argv[], struct flag *flag, int *non_
                             print_user_info(pwd, flag, users[j], j);
                         }
                     }
-                    cleanup_users(users, num_users); //libero la memoria allocata a users
+                    cleanup_users(users, num_users); // Free the memory allocated for users
                     continue;
                 } else {
                     printf("finger: %s: no such user\n", u);
@@ -403,11 +403,11 @@ void handle_non_option_args(int argc, char *argv[], struct flag *flag, int *non_
             }
         }
 
-        if (flag->s_flag != 1 && flag->l_flag != 1) { // Se non ho usato operatori, uso -l come default
+        if (flag->s_flag != 1 && flag->l_flag != 1) { // If no operators were used, use -l as the default
             flag->l_flag = 1;
         }
         
-        print_user_info(pwd, flag, u, i); //l'utente fornito in input è stato trovato, procedo normalmente con la stampa
+        print_user_info(pwd, flag, u, i); // The input user was found, proceed with normal printing
     }
 }
 
