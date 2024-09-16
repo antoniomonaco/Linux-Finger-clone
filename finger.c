@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     int non_option_args_idx[10];
     int non_option_count = 0;
     
-    //itero sugli operatori e imposto i flag corretti
+    // Iterate over the operators and set the correct flags
     while ((opt = getopt(argc, argv, "slmp")) != -1) {
         num_op += 1;
         switch (opt) {
@@ -28,14 +28,14 @@ int main(int argc, char *argv[]) {
                 break;
         }
     }
-    //optind = 1;
+    
     /*
-    I vari argomenti possono essere in qualsiasi posizione, prima, dopo o in mezzo più operatori
-    con il for vado a salvarmi le posizioni di ogni argomento
+    Arguments can be in any position—before, after, or in between multiple operators.
+    The for loop saves the positions of each argument.
     */
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] != '-') {
-            non_option_args_idx[non_option_count] = i;  //mi salvo gli indici in cui ci sono gli argomenti
+            non_option_args_idx[non_option_count] = i;  // Save the indices where arguments are found
             non_option_count++;
         }
     }
@@ -43,20 +43,19 @@ int main(int argc, char *argv[]) {
     if (non_option_count > 0) {
         handle_non_option_args(argc, argv, flag, non_option_args_idx, non_option_count, pwd);
         return EXIT_SUCCESS;
-    } else {// se non ci sono argomenti uso l'utente attivo attualmente (che ha chiamato il comando finger)
+    } else { // If there are no arguments, use the currently active user (who called the finger command)
         if (pwd == NULL) {
             printf("Error processing actual user: %s\n", username);
             return EXIT_FAILURE;
         }
         if (flag->l_flag != 1) {
-            flag->s_flag = 1;  //Se non ci sono operatori metto di default il flag su s
+            flag->s_flag = 1;  // If there are no operators, set the default flag to -s
         }
         print_user_info(pwd, flag, username, -1);
         return EXIT_SUCCESS;
     }
-
-    
 }
+
 
 void read_mail_status(const char *username) {
     char mail_file[MAX_PATH_LENGTH];
